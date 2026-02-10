@@ -1,6 +1,7 @@
 package com.example.a169lablearnandroid
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -30,12 +31,42 @@ import com.example.a169lablearnandroid.ui.theme._169LabLearnAndroidTheme
 class ListActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Log.i("Lifecycle", "ListActivity : onCreate")
         enableEdgeToEdge()
         setContent {
             ListScreen()
         }
     }
+    override fun onStart() {
+        super.onStart()
+        Log.i("Lifecycle", "ListActivity : onStart")
+    }
+    override fun onResume() {
+        super.onResume()
+        //load จะอยุ่ตรงนี้เพื่อ
+        Log.i("Lifecycle", "ListActivity : onResume")
+    }
+    override fun onPause() {
+        super.onPause()
+        Log.i("Lifecycle", "ListActivity : onPause")
+    }
+    override fun onStop() {
+        super.onStop()
+        Log.i("Lifecycle", "ListActivity : onStop")
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        Log.i("Lifecycle", "ListActivity : onDestroy")
+    }
+
+    override fun onRestart() {
+        super.onRestart()
+        Log.i("Lifecycle", "ListActivity : onRestart")
+    }
+
 }
+
 
 data class Pokemon(
     val name: String,
@@ -103,11 +134,6 @@ fun ListScreen(){
                     val imageURL ="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-iii/firered-leafgreen/${item.number}.png"
                     //1.Image View
 
-                    AsyncImage(
-                        model = imageURL,
-                        contentDescription = "Sprite of ${item.name}",
-                        modifier = Modifier.size(64.dp),
-                    )
                 }
                 Text(text=item.name)
             }
