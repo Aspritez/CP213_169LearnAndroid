@@ -22,6 +22,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -33,10 +34,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.a169lablearnandroid.utils.SharedPreferencesUtil
 
 
 class RPGCardActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        SharedPreferencesUtil.init(this)
         super.onCreate(savedInstanceState)
         Log.i("Lifecycle", "MainActivity : onCreate")
         enableEdgeToEdge()
@@ -74,6 +77,7 @@ class RPGCardActivity : ComponentActivity() {
 
     @Composable
     fun RPGCardView(){
+        val name_user = SharedPreferencesUtil.getString("user_name")
         Column(modifier = Modifier
             .fillMaxSize()
             .background(Color.Black)
@@ -87,7 +91,7 @@ class RPGCardActivity : ComponentActivity() {
                 .background(Color.Gray)
             ){
                 Text(
-                    text = "hp",
+                    text = name_user,
                     modifier = Modifier
                         .align(alignment = Alignment.CenterStart)
                         .fillMaxWidth(fraction = 0.69f)
@@ -104,7 +108,7 @@ class RPGCardActivity : ComponentActivity() {
                     .align(Alignment.CenterHorizontally)
                     .padding(top = 10.dp)
                     .clickable {
-                        startActivity(Intent(this@RPGCardActivity, MainActivity2::class.java))
+                        SharedPreferencesUtil.remove("user_name")
                     }
             )
             //status
