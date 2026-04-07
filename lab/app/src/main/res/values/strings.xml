@@ -5,4 +5,6 @@
     <string name="title_activity_menu">MenuActivity</string>
     <string name="title_activity_share_preferences">SharePreferencesActivity</string>
     <string name="title_activity_pokedex_v2">PokedexV2Activity</string>
+    <string name="title_activity_part1_animation">Part1AnimationActivity</string>
+    <string name="title_activity_part2">Part2Activity</string>
 </resources>
