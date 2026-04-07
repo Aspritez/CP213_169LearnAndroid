@@ -21,6 +21,31 @@
         android:theme="@style/Theme._169LabLearnAndroid"
         tools:targetApi="31">
         <activity
+            android:name=".Part8Activity"
+            android:exported="false"
+            android:label="@string/title_activity_part8"
+            android:theme="@style/Theme._169LabLearnAndroid" />
+        <activity
+            android:name=".Part7Activity"
+            android:exported="false"
+            android:label="@string/title_activity_part7"
+            android:theme="@style/Theme._169LabLearnAndroid" />
+        <activity
+            android:name=".Part6Activity"
+            android:exported="false"
+            android:label="@string/title_activity_part6"
+            android:theme="@style/Theme._169LabLearnAndroid" />
+        <activity
+            android:name=".Part5Activity"
+            android:exported="false"
+            android:label="@string/title_activity_part5"
+            android:theme="@style/Theme._169LabLearnAndroid" />
+        <activity
+            android:name=".Part4Activity"
+            android:exported="false"
+            android:label="@string/title_activity_part4"
+            android:theme="@style/Theme._169LabLearnAndroid" />
+        <activity
             android:name=".Part3Activity"
             android:exported="false"
             android:label="@string/title_activity_part3"

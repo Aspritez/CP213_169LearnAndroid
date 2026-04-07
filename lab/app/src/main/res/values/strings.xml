@@ -8,4 +8,9 @@
     <string name="title_activity_part1_animation">Part1AnimationActivity</string>
     <string name="title_activity_part2">Part2Activity</string>
     <string name="title_activity_part3">Part3Activity</string>
+    <string name="title_activity_part4">Part4Activity</string>
+    <string name="title_activity_part5">Part5Activity</string>
+    <string name="title_activity_part6">Part6Activity</string>
+    <string name="title_activity_part7">Part7Activity</string>
+    <string name="title_activity_part8">Part8Activity</string>
 </resources>
