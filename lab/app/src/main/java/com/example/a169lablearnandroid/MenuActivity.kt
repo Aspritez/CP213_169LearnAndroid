@@ -163,5 +163,33 @@ fun MenuScreen() {
         }, modifier = Modifier.fillMaxWidth()) {
             Text("13. Part8Activity (Responsive/Adaptive)")
         }
+
+        // 14. Collapsing
+        Button(onClick = {
+            context.startActivity(Intent(context, Part9Activity::class.java))
+        }, modifier = Modifier.fillMaxWidth()) {
+            Text("14. Part9Activity (Collapsing Toolbar)")
+        }
+
+        // 15. App Widget Concept
+        Button(onClick = {
+            context.startActivity(Intent(context, Part10Activity::class.java))
+        }, modifier = Modifier.fillMaxWidth()) {
+            Text("15. Part10Activity (App Widget Concept)")
+        }
+
+        // 16. Skeleton Loading
+        Button(onClick = {
+            context.startActivity(Intent(context, Part11Activity::class.java))
+        }, modifier = Modifier.fillMaxWidth()) {
+            Text("16. Part11Activity (Skeleton Loading)")
+        }
+
+        // 17. Bottom Sheet & Middle Dialog
+        Button(onClick = {
+            context.startActivity(Intent(context, Part12Activity::class.java))
+        }, modifier = Modifier.fillMaxWidth()) {
+            Text("17. Part12Activity (Modals & Bottom Sheet)")
+        }
     }
 }

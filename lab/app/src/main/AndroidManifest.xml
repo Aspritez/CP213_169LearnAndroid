@@ -21,6 +21,26 @@
         android:theme="@style/Theme._169LabLearnAndroid"
         tools:targetApi="31">
         <activity
+            android:name=".Part12Activity"
+            android:exported="false"
+            android:label="Part12Activity"
+            android:theme="@style/Theme._169LabLearnAndroid" />
+        <activity
+            android:name=".Part11Activity"
+            android:exported="false"
+            android:label="Part11Activity"
+            android:theme="@style/Theme._169LabLearnAndroid" />
+        <activity
+            android:name=".Part10Activity"
+            android:exported="false"
+            android:label="Part10Activity"
+            android:theme="@style/Theme._169LabLearnAndroid" />
+        <activity
+            android:name=".Part9Activity"
+            android:exported="false"
+            android:label="@string/title_activity_part9"
+            android:theme="@style/Theme._169LabLearnAndroid" />
+        <activity
             android:name=".Part8Activity"
             android:exported="false"
             android:label="@string/title_activity_part8"
@@ -112,6 +132,17 @@
             android:exported="false"
             android:label="Sensor Activity"
             android:theme="@style/Theme._169LabLearnAndroid" />
+        <receiver
+            android:name=".WeatherWidgetReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/weather_widget_info" />
+        </receiver>
+
     </application>
 
 </manifest>
