@@ -194,9 +194,9 @@ class GyroscopeViewModel(
         val rotY = event.values[1] // rotation rate รอบแกน Y
 
         _state.update { current ->
-            // ใน landscape: sensor Y → หน้าจอ X, sensor X → หน้าจอ Y
-            val newX = (current.crosshairX + rotY * sensitivity / 1000f).coerceIn(0.05f, 0.95f)
-            val newY = (current.crosshairY + rotX * sensitivity / 1000f).coerceIn(0.05f, 0.95f)
+            // ใน landscape: sensor X → หน้าจอ X (กลับเครื่องหมายเพื่อให้ทิศถูก), sensor Y → หน้าจอ Y
+            val newX = (current.crosshairX - rotX * sensitivity / 1000f).coerceIn(0.05f, 0.95f)
+            val newY = (current.crosshairY + rotY * sensitivity / 1000f).coerceIn(0.05f, 0.95f)
             current.copy(crosshairX = newX, crosshairY = newY)
         }
     }
