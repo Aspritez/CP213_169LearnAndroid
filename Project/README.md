@@ -18,16 +18,75 @@
 ## โครงสร้างของโปรเจกต์ (Project Structure)
 โปรเจกต์นี้พัฒนาด้วยสถาปัตยกรรมแบบ MVVM (Model-View-ViewModel) ร่วมกับ Jetpack Compose โดยมีโครงสร้างที่สำคัญดังนี้:
 
-- `app/src/main/java/com/example/myapplication/`
-  - `MainActivity.kt`: จุดเริ่มต้นของแอปพลิเคชันและการจัดการ Navigation
-  - `audio/`: จัดการระบบเสียงและเอฟเฟกต์ (`AudioController.kt`)
-  - `data/`: จัดการข้อมูลและสถานะของแอป
-    - `local/`: เก็บข้อมูลลงเครื่องผ่าน DataStore (`DataStoreManager.kt`)
-    - `model/`: โครงสร้างข้อมูล (Data classes) ที่ใช้ในแอป (`Models.kt`)
-  - `ui/`: จัดการ User Interface ทั้งหมดด้วย Jetpack Compose
-    - `screens/`: หน้าจอต่างๆ เช่น HomeScreen, GameScreen, GyroscopeGameScreen, SettingsScreen และ ScoreboardScreen
-    - `theme/`: จัดการธีม สี และรูปแบบตัวอักษรของแอปพลิเคชัน
-  - `viewmodel/`: จัดการ Logic และ State ของแต่ละหน้าจอ (`MainViewModel`, `GameViewModel`, `GyroscopeViewModel`)
+└── Project/
+    ├── README.md
+    ├── build.gradle.kts
+    ├── settings.gradle.kts
+    ├── gradle.properties
+    ├── gradle/
+    │   ├── libs.versions.toml
+    │   └── wrapper/
+    │       ├── gradle-wrapper.jar
+    │       └── gradle-wrapper.properties
+    └── app/
+        ├── build.gradle.kts
+        ├── proguard-rules.pro
+        └── src/
+            ├── androidTest (โฟลเดอร์สำหรับเขียนเทสต์บนอุปกรณ์จริง)/
+            │   └── java/
+            │       └── com...
+            ├── test (โฟลเดอร์สำหรับเขียนเทสต์ลอจิกทั่วไป)/
+            │   └── java/
+            │       └── com...
+            └── main/
+                ├── AndroidManifest.xml
+                ├── java/
+                │   └── com/
+                │       └── example/
+                │           └── myapplication/
+                │               ├── MainActivity.kt
+                │               ├── audio/
+                │               │   └── AudioController.kt
+                │               ├── data/
+                │               │   ├── local/
+                │               │   │   └── DataStoreManager.kt
+                │               │   └── model/
+                │               │       └── Models.kt
+                │               ├── ui/
+                │               │   ├── screens/
+                │               │   │   ├── GameScreen.kt
+                │               │   │   ├── GyroscopeGameScreen.kt
+                │               │   │   ├── HomeScreen.kt
+                │               │   │   ├── ScoreboardScreen.kt
+                │               │   │   └── SettingsScreen.kt
+                │               │   └── theme/
+                │               │       ├── Color.kt
+                │               │       ├── Theme.kt
+                │               │       └── Type.kt
+                │               └── viewmodel/
+                │                   ├── GameViewModel.kt
+                │                   ├── GyroscopeViewModel.kt
+                │                   └── MainViewModel.kt
+                ├── res/
+                │   ├── drawable/
+                │   │   ├── cover.png
+                │   │   ├── logo.png
+                │   │   ├── ic_launcher_background.xml
+                │   │   └── ic_launcher_foreground.xml
+                │   ├── mipmap-anydpi-v26
+                │   ├── mipmap-hdpi
+                │   ├── mipmap-mdpi
+                │   ├── mipmap-xhdpi
+                │   ├── mipmap-xxhdpi
+                │   ├── mipmap-xxxhdpi
+                │   ├── values/
+                │   │   ├── colors.xml
+                │   │   ├── strings.xml
+                │   │   └── themes.xml
+                │   └── xml/
+                │       ├── backup_rules.xml
+                │       └── data_extraction_rules.xml
+                └── AndroidManifest.xml
 
 ## เทคโนโลยีที่ใช้ (Tech Stack)
 - **ภาษา:** Kotlin
