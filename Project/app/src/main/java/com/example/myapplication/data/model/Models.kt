@@ -42,5 +42,6 @@ data class AppSettings(
     val sfxEnabled: Boolean = true,
     val targetColorHex: String = "#E63946",
     val sfxSound: String = "pop",           // เสียง SFX: pop, bell, drip, blip, ting
-    val gyroSensitivity: Float = 3.0f       // ค่า sensitivity ของ gyroscope (1.0 - 10.0, default 3.0)
+    val gyroSensitivity: Float = 10.0f,      // ค่า sensitivity ของ gyroscope (5.0 - 15.0, default 8.0)
+    val backgroundColorHex: String = "#0A192F"  // สีพื้นหลังหน้าเกม (default = DarkNavy)
 )

@@ -132,7 +132,12 @@ fun FocusShotApp(dataStoreManager: DataStoreManager, audioController: AudioContr
                         GameMode.GYROSCOPE -> navController.navigate("gyroscope_game")
                     }
                 },
-                onSettingsClick = { navController.navigate("settings") }
+                onSettingsClick = { navController.navigate("settings") },
+                onScoreboardClick = {
+                    navController.navigate("scoreboard") {
+                        popUpTo("home")
+                    }
+                }
             )
         }
 
@@ -182,7 +187,11 @@ fun FocusShotApp(dataStoreManager: DataStoreManager, audioController: AudioContr
             // ===== เริ่มเกมเมื่อเข้าหน้านี้ =====
             // DisposableEffect(Unit) จะ run ครั้งเดียวเมื่อ composable เข้าสู่ composition
             DisposableEffect(Unit) {
-                gameViewModel.processIntent(GameIntent.StartGame(playerName, appSettings.targetColorHex))
+                gameViewModel.processIntent(GameIntent.StartGame(
+                    playerName = playerName,
+                    targetColorHex = appSettings.targetColorHex,
+                    backgroundColorHex = appSettings.backgroundColorHex
+                ))
                 onDispose { }
             }
 
@@ -228,7 +237,8 @@ fun FocusShotApp(dataStoreManager: DataStoreManager, audioController: AudioContr
                     GyroscopeIntent.StartGame(
                         playerName = playerName,
                         targetColorHex = appSettings.targetColorHex,
-                        sensitivity = appSettings.gyroSensitivity
+                        sensitivity = appSettings.gyroSensitivity,
+                        backgroundColorHex = appSettings.backgroundColorHex
                     )
                 )
                 onDispose { }

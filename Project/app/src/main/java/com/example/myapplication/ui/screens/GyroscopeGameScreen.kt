@@ -64,7 +64,14 @@ fun GyroscopeGameScreen(
         PrimaryRed
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    // ===== แปลง background hex color =====
+    val backgroundColor = try {
+        Color(android.graphics.Color.parseColor(state.backgroundColorHex))
+    } catch (e: Exception) {
+        DarkNavy
+    }
+
+    Box(modifier = Modifier.fillMaxSize().background(backgroundColor)) {
 
         // ===== Main Game Layout (Landscape) =====
         Row(

@@ -35,6 +35,7 @@ import kotlin.random.Random
  *   - missCount: จำนวนครั้งที่ยิงพลาด
  *   - totalShots: จำนวนครั้งที่ยิงทั้งหมด (hitCount + missCount)
  *   - accuracy: ความแม่นยำ เป็น % (hitCount / totalShots * 100)
+ *   - backgroundColorHex: สีพื้นหลังหน้าเกม (จาก Settings)
  */
 data class GyroscopeGameState(
     val playerName: String = "",
@@ -54,7 +55,9 @@ data class GyroscopeGameState(
     val hitCount: Int = 0,
     val missCount: Int = 0,
     val totalShots: Int = 0,
-    val accuracy: Float = 0f        // ความแม่นยำ %
+    val accuracy: Float = 0f,       // ความแม่นยำ %
+    // ===== Background Color =====
+    val backgroundColorHex: String = "#0A192F"  // สีพื้นหลังหน้าเกม
 )
 
 /**
@@ -62,7 +65,12 @@ data class GyroscopeGameState(
  * Intent สำหรับ Gyroscope game — เหมือนกับ GameIntent แต่เพิ่ม Fire
  */
 sealed class GyroscopeIntent {
-    data class StartGame(val playerName: String, val targetColorHex: String, val sensitivity: Float) : GyroscopeIntent()
+    data class StartGame(
+        val playerName: String,
+        val targetColorHex: String,
+        val sensitivity: Float,
+        val backgroundColorHex: String = "#0A192F"
+    ) : GyroscopeIntent()
     object Fire : GyroscopeIntent()     // กดปุ่มยิง
     object PlayAgain : GyroscopeIntent()
 }
@@ -109,18 +117,25 @@ class GyroscopeViewModel(
     // ถ้า crosshair อยู่ห่างจากเป้าน้อยกว่า threshold = ยิงโดน
     private val hitThreshold = 0.08f // 8% ของพื้นที่เกม
 
+    // ===== Minimum Distance for Anti-Repeat =====
+    // เป้าใหม่ต้องห่างจากเป้าเดิมอย่างน้อย 20% ของพื้นที่เกม
+    private val minTargetDistance = 0.2f
+
     /**
      * ===== Process Intent =====
      * จุดรับ intent จาก UI
      */
     fun processIntent(intent: GyroscopeIntent) {
         when (intent) {
-            is GyroscopeIntent.StartGame -> startGame(intent.playerName, intent.targetColorHex, intent.sensitivity)
+            is GyroscopeIntent.StartGame -> startGame(
+                intent.playerName, intent.targetColorHex, intent.sensitivity, intent.backgroundColorHex
+            )
             is GyroscopeIntent.Fire -> handleFire()
             is GyroscopeIntent.PlayAgain -> startGame(
                 _state.value.playerName,
                 _state.value.targetColorHex,
-                sensitivity
+                sensitivity,
+                _state.value.backgroundColorHex
             )
         }
     }
@@ -129,21 +144,25 @@ class GyroscopeViewModel(
      * ===== Start Game =====
      * เริ่มเกมใหม่: reset state, ลงทะเบียน sensor listener, เริ่ม countdown
      */
-    private fun startGame(playerName: String, targetColorHex: String, sens: Float) {
+    private fun startGame(playerName: String, targetColorHex: String, sens: Float, backgroundColorHex: String) {
         timerJob?.cancel()
         countdownJob?.cancel()
         sensitivity = sens
 
+        // ===== ป้องกันสีเป้าซ้ำกับพื้นหลัง =====
+        val safeTargetColor = ensureSafeTargetColor(targetColorHex, backgroundColorHex)
+
         _state.update {
             GyroscopeGameState(
                 playerName = playerName,
-                targetColorHex = targetColorHex,
+                targetColorHex = safeTargetColor,
                 countdown = 3,
                 isCountingDown = true,
                 crosshairX = 0.5f,
                 crosshairY = 0.5f,
                 targetX = generateRandomPosition(),
-                targetY = generateRandomPosition()
+                targetY = generateRandomPosition(),
+                backgroundColorHex = backgroundColorHex
             )
         }
 
@@ -236,7 +255,7 @@ class GyroscopeViewModel(
     /**
      * ===== Handle Fire (กดปุ่มยิง) =====
      * ตรวจสอบว่า crosshair อยู่ใกล้เป้าหรือไม่:
-     * - ถ้าระยะห่าง < hitThreshold → HIT: +10 คะแนน, spawn เป้าใหม่
+     * - ถ้าระยะห่าง < hitThreshold → HIT: +10 คะแนน, spawn เป้าใหม่ (ไม่ซ้ำตำแหน่ง)
      * - ถ้าระยะห่าง >= hitThreshold → MISS: เพิ่ม missCount
      * คำนวณ accuracy ใหม่ทุกครั้งที่ยิง
      *
@@ -256,6 +275,18 @@ class GyroscopeViewModel(
         val newMissCount = if (!isHit) current.missCount + 1 else current.missCount
         val newAccuracy = if (newTotalShots > 0) (newHitCount.toFloat() / newTotalShots * 100f) else 0f
 
+        // ===== ถ้ายิงโดน → spawn เป้าใหม่ห่างจากตำแหน่งเดิมอย่างน้อย minTargetDistance =====
+        val newTargetX: Float
+        val newTargetY: Float
+        if (isHit) {
+            val newPos = generateNonRepeatingPosition(current.targetX, current.targetY)
+            newTargetX = newPos.first
+            newTargetY = newPos.second
+        } else {
+            newTargetX = current.targetX
+            newTargetY = current.targetY
+        }
+
         _state.update {
             it.copy(
                 score = if (isHit) it.score + 10 else it.score,
@@ -263,9 +294,8 @@ class GyroscopeViewModel(
                 missCount = newMissCount,
                 totalShots = newTotalShots,
                 accuracy = newAccuracy,
-                // ถ้ายิงโดน → spawn เป้าใหม่ในตำแหน่ง random
-                targetX = if (isHit) generateRandomPosition() else it.targetX,
-                targetY = if (isHit) generateRandomPosition() else it.targetY
+                targetX = newTargetX,
+                targetY = newTargetY
             )
         }
 
@@ -278,6 +308,27 @@ class GyroscopeViewModel(
      */
     private fun generateRandomPosition(): Float {
         return 0.1f + Random.nextFloat() * 0.8f
+    }
+
+    /**
+     * ===== Generate Non-Repeating Position =====
+     * สร้างตำแหน่ง random ที่ห่างจากตำแหน่งเดิมอย่างน้อย minTargetDistance
+     * ป้องกันเป้าขึ้นที่เดิมซ้ำ
+     * ลอง generate ใหม่สูงสุด 20 ครั้ง (fallback ถ้าหาไม่ได้)
+     */
+    private fun generateNonRepeatingPosition(oldX: Float, oldY: Float): Pair<Float, Float> {
+        var attempts = 0
+        var newX: Float
+        var newY: Float
+        do {
+            newX = generateRandomPosition()
+            newY = generateRandomPosition()
+            val dx = newX - oldX
+            val dy = newY - oldY
+            val dist = Math.sqrt((dx * dx + dy * dy).toDouble()).toFloat()
+            attempts++
+        } while (dist < minTargetDistance && attempts < 20)
+        return Pair(newX, newY)
     }
 
     /**

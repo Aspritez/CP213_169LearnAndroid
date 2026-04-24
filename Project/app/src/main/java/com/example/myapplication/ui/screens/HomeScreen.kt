@@ -1,17 +1,23 @@
 package com.example.myapplication.ui.screens
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.myapplication.R
 import com.example.myapplication.data.model.GameMode
 import com.example.myapplication.ui.theme.PrimaryRed
 import com.example.myapplication.ui.theme.TextColor
@@ -33,6 +39,7 @@ import com.example.myapplication.ui.theme.TextColor
  * @param onModeChange callback เมื่อโหมดเปลี่ยน → MainViewModel.updateSelectedMode()
  * @param onStartClick callback เมื่อกด START → navigate ไปหน้าเกม
  * @param onSettingsClick callback เมื่อกด Settings → navigate ไปหน้า Settings
+ * @param onScoreboardClick callback เมื่อกด Scoreboard → navigate ไปหน้า Scoreboard
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -42,7 +49,8 @@ fun HomeScreen(
     onNameChange: (String) -> Unit,
     onModeChange: (GameMode) -> Unit,
     onStartClick: () -> Unit,
-    onSettingsClick: () -> Unit
+    onSettingsClick: () -> Unit,
+    onScoreboardClick: () -> Unit
 ) {
     // ===== State สำหรับ Dropdown =====
     var dropdownExpanded by remember { mutableStateOf(false) }
@@ -60,32 +68,46 @@ fun HomeScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Text(
-                text = "FOCUS",
-                fontSize = 48.sp,
-                fontWeight = FontWeight.Bold,
-                color = TextColor
-            )
-            Text(
-                text = "SHOT",
-                fontSize = 48.sp,
-                fontWeight = FontWeight.Light,
-                color = PrimaryRed
+            // ===== Game Logo (จากไฟล์ logo.png ใน drawable) =====
+            Image(
+                painter = painterResource(id = R.drawable.logo),
+                contentDescription = "Focus Shot Logo",
+                modifier = Modifier.size(300.dp),
+                contentScale = ContentScale.Fit
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(10.dp))
 
-            // ===== ปุ่ม Settings =====
-            IconButton(
-                onClick = onSettingsClick,
-                modifier = Modifier.size(48.dp)
+            // ===== ปุ่ม Settings + Scoreboard =====
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(24.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
-                    imageVector = Icons.Default.Settings,
-                    contentDescription = "Settings",
-                    tint = PrimaryRed,
-                    modifier = Modifier.fillMaxSize()
-                )
+                // ===== ปุ่ม Settings =====
+                IconButton(
+                    onClick = onSettingsClick,
+                    modifier = Modifier.size(64.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Settings,
+                        contentDescription = "Settings",
+                        tint = PrimaryRed,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
+
+                // ===== ปุ่ม Scoreboard =====
+                IconButton(
+                    onClick = onScoreboardClick,
+                    modifier = Modifier.size(64.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Star,
+                        contentDescription = "Scoreboard",
+                        tint = PrimaryRed,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
             }
         }
 
@@ -205,3 +227,4 @@ fun HomeScreen(
         }
     }
 }
+

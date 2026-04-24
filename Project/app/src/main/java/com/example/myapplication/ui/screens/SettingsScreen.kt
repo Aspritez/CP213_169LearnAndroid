@@ -1,5 +1,6 @@
 package com.example.myapplication.ui.screens
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -17,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -25,10 +27,11 @@ import com.example.myapplication.data.model.AppSettings
 import com.example.myapplication.ui.theme.DarkNavy
 import com.example.myapplication.ui.theme.PrimaryRed
 import com.example.myapplication.ui.theme.TextColor
+import com.example.myapplication.viewmodel.isColorTooSimilar
 
 /**
  * ===== SettingsScreen =====
- * หน้าตั้งค่าแอป — ปรับสีเป้า, เสียง SFX, เพลง, ความไว gyroscope
+ * หน้าตั้งค่าแอป — ปรับสีเป้า, สีพื้นหลัง, เสียง SFX, ความไว gyroscope
  *
  * เกี่ยวข้องกับ:
  *   - AppSettings (Models.kt) → ค่าที่แสดงและแก้ไข
@@ -51,7 +54,10 @@ fun SettingsScreen(
     onPreviewSfx: (String) -> Unit,
     onHomeClick: () -> Unit
 ) {
-    // ===== Local state สำหรับ hex color input =====
+    // ===== Context สำหรับ Toast =====
+    val context = LocalContext.current
+
+    // ===== Local state สำหรับ target hex color input =====
     // ใช้ local state เพื่อให้ผู้ใช้พิมพ์ได้อิสระ ก่อนกด apply
     var hexInput by remember(appSettings.targetColorHex) {
         mutableStateOf(appSettings.targetColorHex)
@@ -68,6 +74,35 @@ fun SettingsScreen(
     val isValidHex = try {
         android.graphics.Color.parseColor(hexInput)
         true
+    } catch (e: Exception) {
+        false
+    }
+
+    // ===== Local state สำหรับ background hex color input =====
+    var bgHexInput by remember(appSettings.backgroundColorHex) {
+        mutableStateOf(appSettings.backgroundColorHex)
+    }
+
+    // แปลง background hex เป็น Color สำหรับ preview
+    val bgPreviewColor = try {
+        Color(android.graphics.Color.parseColor(bgHexInput))
+    } catch (e: Exception) {
+        DarkNavy
+    }
+
+    // ตรวจสอบว่า background hex ถูกต้องหรือไม่
+    val isValidBgHex = try {
+        android.graphics.Color.parseColor(bgHexInput)
+        true
+    } catch (e: Exception) {
+        false
+    }
+
+    // ===== ตรวจสอบว่าสีเป้ากับสีพื้นหลังเหมือนกันหรือคล้ายกัน =====
+    val isColorConflict = try {
+        if (isValidHex && isValidBgHex) {
+            isColorTooSimilar(hexInput, bgHexInput)
+        } else false
     } catch (e: Exception) {
         false
     }
@@ -160,27 +195,40 @@ fun SettingsScreen(
                         .border(2.dp, Color.White, CircleShape)
                 )
 
-                // ===== ช่อง input hex code =====
+                // ===== ช่อง input hex code (จำกัด 7 ตัว: #XXXXXX) =====
                 OutlinedTextField(
                     value = hexInput,
                     onValueChange = { newValue ->
-                        hexInput = newValue
-                        // ถ้า hex ถูกต้อง → อัปเดต settings ทันที
-                        try {
-                            android.graphics.Color.parseColor(newValue)
-                            onSettingsChanged(appSettings.copy(targetColorHex = newValue))
-                        } catch (e: Exception) {
-                            // hex ยังไม่ถูกต้อง → ไม่อัปเดต
+                        // จำกัดให้ใส่ได้แค่ # + hex chars สูงสุด 7 ตัว (#XXXXXX)
+                        val filtered = newValue.filter { it == '#' || it in '0'..'9' || it in 'a'..'f' || it in 'A'..'F' }
+                        if (filtered.length <= 7) {
+                            hexInput = filtered
+                            // ถ้า hex ถูกต้อง → ตรวจสอบว่าซ้ำกับ background ไหม
+                            try {
+                                android.graphics.Color.parseColor(filtered)
+                                // ===== เช็คสีเป้ากับพื้นหลังห้ามเหมือนกัน =====
+                                if (isValidBgHex && isColorTooSimilar(filtered, bgHexInput)) {
+                                    Toast.makeText(
+                                        context,
+                                        "⚠ สีเป้าหมายคล้ายกับสีพื้นหลังเกินไป กรุณาใส่สีอื่น",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                } else {
+                                    onSettingsChanged(appSettings.copy(targetColorHex = filtered))
+                                }
+                            } catch (e: Exception) {
+                                // hex ยังไม่ถูกต้อง → ไม่อัปเดต
+                            }
                         }
                     },
                     modifier = Modifier.weight(1f),
                     shape = RoundedCornerShape(16.dp),
                     label = { Text("Hex Code (e.g. #E63946)") },
                     singleLine = true,
-                    isError = !isValidHex,
+                    isError = !isValidHex || isColorConflict,
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = PrimaryRed,
-                        unfocusedBorderColor = Color.LightGray,
+                        focusedBorderColor = if (isColorConflict) Color.Red else PrimaryRed,
+                        unfocusedBorderColor = if (isColorConflict) Color.Red else Color.LightGray,
                         focusedContainerColor = Color.White,
                         unfocusedContainerColor = Color.White,
                         focusedTextColor = Color.Black,
@@ -198,10 +246,98 @@ fun SettingsScreen(
                 )
             }
 
+            // ===== แสดง warning ถ้าสีซ้ำกัน =====
+            if (isColorConflict) {
+                Text(
+                    "⚠ สีเป้าหมายคล้ายกับสีพื้นหลังเกินไป กรุณาใส่สีอื่น",
+                    color = Color.Red,
+                    fontSize = 12.sp
+                )
+            }
+
             Divider(color = Color.Gray.copy(alpha = 0.3f))
 
             // ========================================
-            // ส่วนที่ 2: เสียง SFX (Sound Effect)
+            // ส่วนที่ 2: สีพื้นหลังหน้าเกม (Background Color)
+            // ========================================
+            // ผู้ใช้พิมพ์ hex code สำหรับสีพื้นหลังหน้าเกม
+            // มี preview วงกลมสีให้ดูแบบ real-time
+            Text(
+                "BACKGROUND COLOR",
+                color = TextColor,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold
+            )
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                // ===== Preview วงกลมสีพื้นหลัง =====
+                Box(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clip(CircleShape)
+                        .background(bgPreviewColor)
+                        .border(2.dp, Color.White, CircleShape)
+                )
+
+                // ===== ช่อง input background hex code (จำกัด 7 ตัว: #XXXXXX) =====
+                OutlinedTextField(
+                    value = bgHexInput,
+                    onValueChange = { newValue ->
+                        // จำกัดให้ใส่ได้แค่ # + hex chars สูงสุด 7 ตัว (#XXXXXX)
+                        val filtered = newValue.filter { it == '#' || it in '0'..'9' || it in 'a'..'f' || it in 'A'..'F' }
+                        if (filtered.length <= 7) {
+                            bgHexInput = filtered
+                            // ถ้า hex ถูกต้อง → ตรวจสอบว่าซ้ำกับ target ไหม
+                            try {
+                                android.graphics.Color.parseColor(filtered)
+                                // ===== เช็คสีพื้นหลังกับเป้าห้ามเหมือนกัน =====
+                                if (isValidHex && isColorTooSimilar(hexInput, filtered)) {
+                                    Toast.makeText(
+                                        context,
+                                        "⚠ สีพื้นหลังคล้ายกับสีเป้าหมายเกินไป กรุณาใส่สีอื่น",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                } else {
+                                    onSettingsChanged(appSettings.copy(backgroundColorHex = filtered))
+                                }
+                            } catch (e: Exception) {
+                                // hex ยังไม่ถูกต้อง → ไม่อัปเดต
+                            }
+                        }
+                    },
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(16.dp),
+                    label = { Text("Hex Code (e.g. #0A192F)") },
+                    singleLine = true,
+                    isError = !isValidBgHex || isColorConflict,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = if (isColorConflict) Color.Red else PrimaryRed,
+                        unfocusedBorderColor = if (isColorConflict) Color.Red else Color.LightGray,
+                        focusedContainerColor = Color.White,
+                        unfocusedContainerColor = Color.White,
+                        focusedTextColor = Color.Black,
+                        unfocusedTextColor = Color.Black,
+                        errorBorderColor = Color.Red
+                    )
+                )
+            }
+
+            if (!isValidBgHex) {
+                Text(
+                    "⚠ Invalid hex code",
+                    color = Color.Red,
+                    fontSize = 12.sp
+                )
+            }
+
+            Divider(color = Color.Gray.copy(alpha = 0.3f))
+
+            // ========================================
+            // ส่วนที่ 3: เสียง SFX (Sound Effect)
             // ========================================
             // 5 เสียงให้เลือก: pop, bell, drip, blip, ting
             // กด play icon เพื่อ preview เสียงก่อนเลือก
@@ -263,27 +399,8 @@ fun SettingsScreen(
             Divider(color = Color.Gray.copy(alpha = 0.3f))
 
             // ========================================
-            // ส่วนที่ 3: Music + SFX Toggles
+            // ส่วนที่ 4: SFX Toggle
             // ========================================
-            // เปิด/ปิดเพลง Background Music
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text("MUSIC", color = TextColor, fontSize = 18.sp, fontWeight = FontWeight.Bold)
-                Switch(
-                    checked = appSettings.musicEnabled,
-                    onCheckedChange = {
-                        onSettingsChanged(appSettings.copy(musicEnabled = it))
-                    },
-                    colors = SwitchDefaults.colors(
-                        checkedThumbColor = Color.White,
-                        checkedTrackColor = PrimaryRed
-                    )
-                )
-            }
-
             // เปิด/ปิดเสียง SFX
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -306,7 +423,7 @@ fun SettingsScreen(
             Divider(color = Color.Gray.copy(alpha = 0.3f))
 
             // ========================================
-            // ส่วนที่ 4: Gyroscope Sensitivity
+            // ส่วนที่ 5: Gyroscope Sensitivity
             // ========================================
             // แถบเลื่อน (Slider) ปรับความไวของ gyroscope
             // ค่าต่ำ (1.0) = crosshair เคลื่อนที่ช้า (เหมาะสำหรับเล็งละเอียด)
@@ -334,8 +451,8 @@ fun SettingsScreen(
                     onValueChange = { newValue ->
                         onSettingsChanged(appSettings.copy(gyroSensitivity = newValue))
                     },
-                    valueRange = 1f..10f,
-                    steps = 17,  // 0.5 ขั้น (18 steps = 19 values from 1.0 to 10.0)
+                    valueRange = 5f..15f,
+                    steps = 19,  // 0.5 ขั้น (20 steps = 21 values from 5.0 to 15.0)
                     modifier = Modifier.weight(1f).padding(horizontal = 8.dp),
                     colors = SliderDefaults.colors(
                         thumbColor = PrimaryRed,

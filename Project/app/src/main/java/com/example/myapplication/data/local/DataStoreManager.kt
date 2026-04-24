@@ -39,6 +39,7 @@ class DataStoreManager(private val context: Context) {
         val TARGET_COLOR_KEY = stringPreferencesKey("target_color_key")  // สี hex ของเป้าหมาย
         val SFX_SOUND_KEY = stringPreferencesKey("sfx_sound_key")        // ชื่อเสียง SFX ที่เลือก (pop/bell/drip/blip/ting)
         val GYRO_SENSITIVITY_KEY = floatPreferencesKey("gyro_sensitivity_key") // ค่า sensitivity ของ gyroscope
+        val BACKGROUND_COLOR_KEY = stringPreferencesKey("background_color_key") // สีพื้นหลังหน้าเกม
     }
 
     /**
@@ -52,7 +53,8 @@ class DataStoreManager(private val context: Context) {
             sfxEnabled = preferences[SFX_KEY] ?: true,
             targetColorHex = preferences[TARGET_COLOR_KEY] ?: "#E63946",
             sfxSound = preferences[SFX_SOUND_KEY] ?: "pop",
-            gyroSensitivity = preferences[GYRO_SENSITIVITY_KEY] ?: 3.0f
+            gyroSensitivity = preferences[GYRO_SENSITIVITY_KEY] ?: 3.0f,
+            backgroundColorHex = preferences[BACKGROUND_COLOR_KEY] ?: "#0A192F"
         )
     }
 
@@ -68,6 +70,7 @@ class DataStoreManager(private val context: Context) {
             preferences[TARGET_COLOR_KEY] = settings.targetColorHex
             preferences[SFX_SOUND_KEY] = settings.sfxSound
             preferences[GYRO_SENSITIVITY_KEY] = settings.gyroSensitivity
+            preferences[BACKGROUND_COLOR_KEY] = settings.backgroundColorHex
         }
     }
 
