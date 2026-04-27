@@ -2,9 +2,12 @@ package com.example.myapplication.ui.screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.QuestionMark
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
@@ -55,6 +58,9 @@ fun HomeScreen(
     // ===== State สำหรับ Dropdown =====
     var dropdownExpanded by remember { mutableStateOf(false) }
 
+    // ===== State สำหรับ Tutorial Dialog =====
+    var showTutorialDialog by remember { mutableStateOf(false) }
+
     Row(
         modifier = Modifier
             .fillMaxSize()
@@ -72,7 +78,7 @@ fun HomeScreen(
             Image(
                 painter = painterResource(id = R.drawable.logo),
                 contentDescription = "Focus Shot Logo",
-                modifier = Modifier.size(300.dp),
+                modifier = Modifier.size(270.dp),
                 contentScale = ContentScale.Fit
             )
 
@@ -84,30 +90,77 @@ fun HomeScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 // ===== ปุ่ม Settings =====
-                IconButton(
-                    onClick = onSettingsClick,
-                    modifier = Modifier.size(64.dp)
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Settings,
-                        contentDescription = "Settings",
-                        tint = PrimaryRed,
-                        modifier = Modifier.fillMaxSize()
+                    IconButton(
+                        onClick = onSettingsClick,
+                        modifier = Modifier.size(48.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Settings,
+                            contentDescription = "Settings",
+                            tint = PrimaryRed,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
+                    Text(
+                        text = "SETTING",
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = PrimaryRed
                     )
                 }
 
                 // ===== ปุ่ม Scoreboard =====
-                IconButton(
-                    onClick = onScoreboardClick,
-                    modifier = Modifier.size(64.dp)
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Star,
-                        contentDescription = "Scoreboard",
-                        tint = PrimaryRed,
-                        modifier = Modifier.fillMaxSize()
+                    IconButton(
+                        onClick = onScoreboardClick,
+                        modifier = Modifier.size(48.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Star,
+                            contentDescription = "Scoreboard",
+                            tint = PrimaryRed,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
+                    Text(
+                        text = "SCOREBOARD",
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = PrimaryRed
                     )
                 }
+
+                // ===== ปุ่ม Tutorial =====
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+
+                    IconButton(
+                        onClick = { showTutorialDialog = true },
+                        modifier = Modifier.size(48.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.QuestionMark,
+                            contentDescription = "Tutorial",
+                            tint = PrimaryRed,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
+                    Text(
+                        text = "TUTORIAL",
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = PrimaryRed
+                    )
+
+                }
+
+
             }
         }
 
@@ -131,7 +184,9 @@ fun HomeScreen(
             OutlinedTextField(
                 value = playerName,
                 onValueChange = onNameChange,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .width(500.dp)
+                    .height(50.dp),
                 shape = RoundedCornerShape(24.dp),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = PrimaryRed,
@@ -171,7 +226,8 @@ fun HomeScreen(
                     onValueChange = {},
                     readOnly = true,
                     modifier = Modifier
-                        .fillMaxWidth()
+                        .width(500.dp)
+                        .height(50.dp)
                         .menuAnchor(),
                     shape = RoundedCornerShape(24.dp),
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = dropdownExpanded) },
@@ -225,6 +281,50 @@ fun HomeScreen(
                 Text(text = "START", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Color.White)
             }
         }
+    }
+
+    // ===== Tutorial Popup Dialog =====
+    if (showTutorialDialog) {
+        AlertDialog(
+            onDismissRequest = { showTutorialDialog = false },
+            title = {
+                Text(
+                    text = "HOW TO PLAY",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 20.sp,
+                    color = PrimaryRed
+                )
+            },
+            text = {
+                val scrollState = rememberScrollState()
+                Column(
+                    modifier = Modifier
+                        .heightIn(max = 300.dp)
+                        .verticalScroll(scrollState),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(text = " Gridshot Mode", fontWeight = FontWeight.Bold, color = PrimaryRed)
+                    Text(text = "• เป้าหมายจะปรากฏขึ้นบนหน้าจอ")
+                    Text(text = "• แตะเป้าหมายให้ได้มากที่สุดก่อนหมดเวลา")
+                    Text(text = "• แตะถูกเป้า +10 คะแนน")
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(text = " Gyroscope Training Mode", fontWeight = FontWeight.Bold, color = PrimaryRed)
+                    Text(text = "• ใช้การเอียงตัวเครื่องเพื่อเล็งเป้าหมาย")
+                    Text(text = "• ขยับเครื่องไปทิศต่าง ๆ เพื่อควบคุม crosshair")
+                    Text(text = "• แตะหน้าจอเพื่อยิงเมื่อ crosshair อยู่บนเป้า")
+                    Text(text = "• แตะถูกเป้า +10 คะแนน")
+                    Text(text = "• เมื่อยิงไม่โดนเป้าจะทำให้ความแม่นยำลดลง")
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(text = "⭐ กรอกชื่อก่อนกด START เพื่อบันทึกคะแนน")
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showTutorialDialog = false }) {
+                    Text(text = "เข้าใจแล้ว!", fontWeight = FontWeight.Bold, color = PrimaryRed)
+                }
+            },
+            shape = RoundedCornerShape(16.dp)
+        )
     }
 }
 
