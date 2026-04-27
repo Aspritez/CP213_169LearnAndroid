@@ -1,6 +1,8 @@
 package com.example.myapplication
 
 import android.os.Bundle
+import android.view.WindowInsets
+import android.view.WindowInsetsController
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -54,12 +56,44 @@ class MainActivity : ComponentActivity() {
         dataStoreManager = DataStoreManager(this)
 
         enableEdgeToEdge()
+        enableImmersiveMode()
+
         setContent {
             MyApplicationTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {
                     FocusShotApp(dataStoreManager, audioController)
                 }
             }
+        }
+    }
+
+    /**
+     * บังคับ Immersive Mode ทุกครั้งที่ window ได้รับ focus กลับมา
+     * (เช่น หลังกด Home แล้วกลับมา, หรือหลังดึง notification shade)
+     */
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        if (hasFocus) {
+            enableImmersiveMode()
+        }
+    }
+
+    /**
+     * ===== enableImmersiveMode =====
+     * ซ่อน Status Bar และ Navigation Bar แบบ Sticky Immersive
+     * โดยใช้ WindowInsetsController (API 30+)
+     *
+     * พฤติกรรม:
+     *   - ซ่อนแถบสถานะ (Status Bar) และแถบนำทาง (Navigation Bar)
+     *   - ผู้ใช้ swipe จากขอบเพื่อแสดงแถบชั่วคราว แล้วซ่อนอีกครั้งอัตโนมัติ
+     */
+    private fun enableImmersiveMode() {
+        window.insetsController?.let { controller ->
+            controller.hide(
+                WindowInsets.Type.statusBars() or WindowInsets.Type.navigationBars()
+            )
+            controller.systemBarsBehavior =
+                WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
         }
     }
 

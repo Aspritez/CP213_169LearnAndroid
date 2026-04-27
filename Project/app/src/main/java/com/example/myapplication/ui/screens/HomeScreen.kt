@@ -78,7 +78,7 @@ fun HomeScreen(
             Image(
                 painter = painterResource(id = R.drawable.logo),
                 contentDescription = "Focus Shot Logo",
-                modifier = Modifier.size(270.dp),
+                modifier = Modifier.size(240.dp),
                 contentScale = ContentScale.Fit
             )
 
@@ -186,7 +186,7 @@ fun HomeScreen(
                 onValueChange = onNameChange,
                 modifier = Modifier
                     .width(500.dp)
-                    .height(50.dp),
+                    .height(70.dp),
                 shape = RoundedCornerShape(24.dp),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = PrimaryRed,
@@ -227,7 +227,7 @@ fun HomeScreen(
                     readOnly = true,
                     modifier = Modifier
                         .width(500.dp)
-                        .height(50.dp)
+                        .height(70.dp)
                         .menuAnchor(),
                     shape = RoundedCornerShape(24.dp),
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = dropdownExpanded) },
